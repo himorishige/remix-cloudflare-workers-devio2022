@@ -1,18 +1,16 @@
 import type { Session } from '@remix-run/cloudflare';
-import { createCloudflareKVSessionStorage } from '@remix-run/cloudflare';
+import { createCookieSessionStorage } from '@remix-run/cloudflare';
 
 const getSessionStorage = (env: Env) => {
   if (!env.SESSION_SECRET) throw new Error('SESSION_SECRET is not defined');
 
-  return createCloudflareKVSessionStorage({
+  return createCookieSessionStorage({
     cookie: {
       httpOnly: true,
-      name: 'remix-on-the-fridge',
       path: '/',
       sameSite: 'lax',
       secrets: [env.SESSION_SECRET],
     },
-    kv: env.SESSION_KV,
   });
 };
 

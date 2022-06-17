@@ -1,5 +1,4 @@
-import type { LoaderFunction, MetaFunction } from '@remix-run/cloudflare';
-import { json } from '@remix-run/cloudflare';
+import type { MetaFunction } from '@remix-run/cloudflare';
 import {
   Link,
   Links,
@@ -20,26 +19,14 @@ export const meta: MetaFunction = () => ({
   viewport: 'width=device-width,initial-scale=1',
 });
 
-type LoaderData = {
-  loaderCalls: number;
-};
-
 export const links = () => {
   return [{ rel: 'stylesheet', href: styles }];
-};
-
-export const loader: LoaderFunction = async ({ context: { env } }) => {
-  const counter = env.COUNTER.get(env.COUNTER.idFromName('root'));
-  const counterResponse = await counter.fetch('https://.../increment');
-  const loaderCalls = Number.parseInt(await counterResponse.text());
-
-  return json<LoaderData>({ loaderCalls });
 };
 
 const Document = ({ children }: PropsWithChildren<{}>) => {
   const matches = useMatches();
   const root = matches.find((match) => match.id === 'root');
-  const data = root?.data as LoaderData | undefined;
+  console.log('root', root);
 
   return (
     <html lang="en">
@@ -54,12 +41,6 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
           </h1>
         </header>
         {children}
-        {data && (
-          <>
-            <hr />
-            <footer>root loader invocations: {data.loaderCalls}</footer>
-          </>
-        )}
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

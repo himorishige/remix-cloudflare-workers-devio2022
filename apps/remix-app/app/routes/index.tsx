@@ -4,27 +4,20 @@ import { Form, useLoaderData } from '@remix-run/react';
 import { getSession } from '~/session.server';
 
 type LoaderData = {
-  loaderCalls: number;
   username?: string;
 };
 
 export const loader: LoaderFunction = async ({ context: { env }, request }) => {
   const sessionPromise = getSession(request, env);
 
-  const counter = env.COUNTER.get(env.COUNTER.idFromName('index'));
-  const loaderCalls = await counter
-    .fetch('https://.../increment')
-    .then((response) => response.text())
-    .then((text) => Number.parseInt(text, 10));
-
   const session = await sessionPromise;
   const username = (session.get('username') || undefined) as string | undefined;
 
-  return json<LoaderData>({ loaderCalls, username });
+  return json<LoaderData>({ username });
 };
 
 export default function Index() {
-  const { loaderCalls, username } = useLoaderData() as LoaderData;
+  const { username } = useLoaderData() as LoaderData;
 
   return (
     <main>
@@ -48,10 +41,6 @@ export default function Index() {
           </button>
         </div>
       </Form>
-      <hr />
-      <footer>
-        <p>index loader invocations: {loaderCalls}</p>
-      </footer>
     </main>
   );
 }
