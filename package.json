@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "deploy": "turbo run build && cd packages/worker && wrangler publish index.ts",
+    "deploy": "turbo run build && wrangler -c services/worker/wrangler.toml publish",
     "dev": "turbo run dev --parallel",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",

@@ -4,14 +4,11 @@
       "dependsOn": ["^build"],
       "outputs": ["build/**", "public/build/**", ".cache/**"]
     },
-    "e2e": {
-      "outputs": ["coverage/**"],
-      "dependsOn": ["build"]
-    },
     "lint": {
       "outputs": []
     },
     "dev": {
+      "dependsOn": ["remix-app#build"],
       "cache": false
     },
     "type-check": {
