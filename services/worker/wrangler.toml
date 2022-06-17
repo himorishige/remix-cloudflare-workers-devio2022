@@ -1,0 +1,34 @@
+account_id = "c6b57d8118d831cbff9ee7178ce395e5"
+compatibility_date = "2022-05-14"
+name = "remix-boilerplate-with-do"
+
+main = "index.ts"
+
+workers_dev = true
+
+kv_namespaces = [
+  { binding = "SESSION_KV", id = "02768c132d584927aa6f937f86f6afad", preview_id = "6faef1f88c3a4b999d8e2e925cd29379" },
+]
+
+[site]
+bucket = "../../apps/remix-app/public"
+
+[env.dev]
+vars = {SESSION_SECRET = "should-be-secure-in-prod"}
+kv_namespaces = [
+  { binding = "SESSION_KV", id = "02768c132d584927aa6f937f86f6afad", preview_id = "6faef1f88c3a4b999d8e2e925cd29379" },
+]
+
+[env.dev.durable_objects]
+bindings = [
+  {name = "COUNTER", class_name = "CounterDurableObject"},
+]
+
+[durable_objects]
+bindings = [
+  {name = "COUNTER", class_name = "CounterDurableObject"},
+]
+
+[[migrations]]
+new_classes = ["CounterDurableObject"]
+tag = "v1"
