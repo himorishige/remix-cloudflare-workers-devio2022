@@ -5,6 +5,8 @@ import manifestJSON from '__STATIC_CONTENT_MANIFEST';
 
 import * as build from 'remix-dashboard';
 
+import { createSupabaseClient } from './supabase';
+
 const assetManifest = JSON.parse(manifestJSON);
 const handleRemixRequest = createRequestHandler(build, process.env.NODE_ENV);
 
@@ -36,7 +38,8 @@ export const remixAdapter = async (
     );
   } catch (error) {}
   try {
-    const loadContext: AppLoadContext = { env };
+    const supabase = createSupabaseClient(env);
+    const loadContext: AppLoadContext = { env, supabase };
 
     return await handleRemixRequest(request, loadContext);
   } catch (error) {

@@ -11,7 +11,7 @@ import {
   useMatches,
 } from '@remix-run/react';
 import type { PropsWithChildren } from 'react';
-import styles from './styles/app.css';
+// import styles from './styles/app.css';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
@@ -19,9 +19,9 @@ export const meta: MetaFunction = () => ({
   viewport: 'width=device-width,initial-scale=1',
 });
 
-export const links = () => {
-  return [{ rel: 'stylesheet', href: styles }];
-};
+// export const links = () => {
+//   return [{ rel: 'stylesheet', href: styles }];
+// };
 
 const Document = ({ children }: PropsWithChildren<{}>) => {
   const matches = useMatches();
@@ -33,6 +33,10 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
       <head>
         <Meta />
         <Links />
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/@exampledev/new.css@1.1.3/new.css"
+        />
       </head>
       <body>
         <header>

@@ -4,42 +4,47 @@ import { Form, useLoaderData } from '@remix-run/react';
 import { getSession } from '~/session.server';
 
 type LoaderData = {
-  username?: string;
+  access_token?: string;
+  refresh_token?: string;
 };
 
 export const loader: LoaderFunction = async ({ context: { env }, request }) => {
   const sessionPromise = getSession(request, env);
 
   const session = await sessionPromise;
-  const username = (session.get('username') || undefined) as string | undefined;
+  const access_token = (session.get('access_token') || undefined) as
+    | string
+    | undefined;
+  const refresh_token = (session.get('refresh_token') || undefined) as
+    | string
+    | undefined;
 
-  return json<LoaderData>({ username });
+  return json<LoaderData>({ access_token, refresh_token });
 };
 
 export default function Index() {
-  const { username } = useLoaderData() as LoaderData;
+  const { access_token, refresh_token } = useLoaderData() as LoaderData;
 
   return (
     <main>
+      <div>
+        <p>{access_token}</p>
+        <p>{refresh_token}</p>
+      </div>
       <Form method="post" id="username-form" action="/login">
-        <div className="flex">
+        <div>
           <input
             name="username"
             type="text"
             placeholder="Choose a Username"
             required
             maxLength={32}
-            className="py-1 px-3 w-full text-base leading-8 text-gray-700 bg-white rounded border border-sky-300 focus:border-indigo-500 outline-none focus:ring-2 focus:ring-indigo-200 transition-colors duration-200 ease-in-out"
-            defaultValue={username}
           />
-          <button
-            type="submit"
-            className="flex justify-center items-center py-2 px-4 font-medium text-white bg-blue-500 hover:bg-blue-600 disabled:bg-slate-400 rounded border-0 focus:outline-none"
-            data-testid="login-button"
-          >
-            Login
-          </button>
+          <button type="submit">Login</button>
         </div>
+      </Form>
+      <Form method="post" action="/dashboard/logout">
+        <button type="submit">Logout</button>
       </Form>
     </main>
   );

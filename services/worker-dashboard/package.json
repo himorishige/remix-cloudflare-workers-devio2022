@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "wrangler dev --env dev --local",
+    "dev": "wrangler dev -c ./wrangler.dev.toml --env dev --local",
     "lint": "eslint .",
     "type-check": "tsc -b"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.2.0",
     "@remix-run/cloudflare": "^1.5.1",
+    "@supabase/supabase-js": "^1.35.3",
     "remix-dashboard": "*"
   },
   "devDependencies": {

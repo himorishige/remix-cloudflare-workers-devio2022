@@ -1,17 +1,19 @@
-import { supabaseClient } from '~/utils/supabase.server';
 import type { Error } from '~/types';
 
 import type { Session } from '@remix-run/cloudflare';
-import type { User } from '@supabase/supabase-js';
+import type { User, SupabaseClient } from '@supabase/supabase-js';
 
 type AuthForm = {
   email: string;
   password: string;
 };
 
-export async function setSBAuth(session: Session): Promise<void> {
+export async function setSBAuth(
+  session: Session,
+  supabase: SupabaseClient,
+): Promise<void> {
   const userAccessToken = session.get('access_token');
-  supabaseClient.auth.setAuth(userAccessToken);
+  supabase.auth.setAuth(userAccessToken);
 }
 
 export function setAuthSession(
@@ -33,12 +35,16 @@ function hasAuthSession(session: Session): boolean {
   }
 }
 
-export async function hasActiveAuthSession(session: Session): Promise<boolean> {
+export async function hasActiveAuthSession(
+  session: Session,
+  supabase: SupabaseClient,
+): Promise<boolean> {
   try {
     if (!hasAuthSession(session)) return false;
 
     const { user, error } = await getUserByAccessToken(
       session.get('access_token'),
+      supabase,
     );
 
     if (error || !user) return false;
@@ -48,9 +54,12 @@ export async function hasActiveAuthSession(session: Session): Promise<boolean> {
   }
 }
 
-export async function refreshUserToken(session: Session): Promise<LoginReturn> {
+export async function refreshUserToken(
+  session: Session,
+  supabase: SupabaseClient,
+): Promise<LoginReturn> {
   try {
-    const { data, error } = await supabaseClient.auth.api.refreshAccessToken(
+    const { data, error } = await supabase.auth.api.refreshAccessToken(
       session.get('refresh_token'),
     );
 
@@ -71,65 +80,66 @@ type LoginReturn = {
   accessToken?: string;
   refreshToken?: string;
 } & Error;
-export async function loginUser({
-  email,
-  password,
-}: AuthForm): Promise<LoginReturn> {
-  try {
-    const { data: sessionData, error: loginError } =
-      await supabaseClient.auth.api.signInWithEmail(email, password);
+// export async function loginUser({
+//   email,
+//   password,
+// }: AuthForm): Promise<LoginReturn> {
+//   try {
+//     const { data: sessionData, error: loginError } =
+//       await supabaseClient.auth.api.signInWithEmail(email, password);
 
-    if (
-      loginError ||
-      !sessionData ||
-      !sessionData.access_token ||
-      !sessionData.refresh_token
-    ) {
-      return { error: loginError?.message || 'Something went wrong' };
-    }
+//     if (
+//       loginError ||
+//       !sessionData ||
+//       !sessionData.access_token ||
+//       !sessionData.refresh_token
+//     ) {
+//       return { error: loginError?.message || 'Something went wrong' };
+//     }
 
-    return {
-      accessToken: sessionData.access_token,
-      refreshToken: sessionData.refresh_token,
-    };
-  } catch {
-    return { error: 'Something went wrong' };
-  }
-}
+//     return {
+//       accessToken: sessionData.access_token,
+//       refreshToken: sessionData.refresh_token,
+//     };
+//   } catch {
+//     return { error: 'Something went wrong' };
+//   }
+// }
 
-type RegisterReturn = {
-  user?: User;
-} & Error;
-export async function registerUser({
-  email,
-  password,
-}: AuthForm): Promise<RegisterReturn> {
-  try {
-    const { user, error: signUpError } = await supabaseClient.auth.signUp({
-      email,
-      password,
-    });
+// type RegisterReturn = {
+//   user?: User;
+// } & Error;
+// export async function registerUser({
+//   email,
+//   password,
+// }: AuthForm): Promise<RegisterReturn> {
+//   try {
+//     const { user, error: signUpError } = await supabaseClient.auth.signUp({
+//       email,
+//       password,
+//     });
 
-    if (signUpError || !user) {
-      return { error: signUpError?.message || 'Something went wrong' };
-    }
+//     if (signUpError || !user) {
+//       return { error: signUpError?.message || 'Something went wrong' };
+//     }
 
-    return { user };
-  } catch {
-    return {
-      error: 'Something went wrong',
-    };
-  }
-}
+//     return { user };
+//   } catch {
+//     return {
+//       error: 'Something went wrong',
+//     };
+//   }
+// }
 
 type SignOutUserReturn = {
   done: boolean;
 } & Error;
 export async function signOutUser(
   session: Session,
+  supabase: SupabaseClient,
 ): Promise<SignOutUserReturn> {
   try {
-    const { error } = await supabaseClient.auth.api.signOut(
+    const { error } = await supabase.auth.api.signOut(
       session.get('access_token'),
     );
     if (error) {
@@ -149,9 +159,10 @@ type GetUserReturn = {
 } & Error;
 export async function getUserByAccessToken(
   accessToken: string,
+  supabase: SupabaseClient,
 ): Promise<GetUserReturn> {
   try {
-    const { user, error } = await supabaseClient.auth.api.getUser(accessToken);
+    const { user, error } = await supabase.auth.api.getUser(accessToken);
 
     if (error || !user) {
       return { error: error?.message || 'Something went wrong' };
@@ -165,60 +176,60 @@ export async function getUserByAccessToken(
   }
 }
 
-type SendResetPasswordEmailForUserArgs = {
-  email: string;
-  redirectTo: string;
-};
-export async function sendResetPasswordEmailForUser({
-  email,
-  redirectTo,
-}: SendResetPasswordEmailForUserArgs): Promise<Error> {
-  try {
-    const { data, error } = await supabaseClient.auth.api.resetPasswordForEmail(
-      email,
-      {
-        redirectTo,
-      },
-    );
+// type SendResetPasswordEmailForUserArgs = {
+//   email: string;
+//   redirectTo: string;
+// };
+// export async function sendResetPasswordEmailForUser({
+//   email,
+//   redirectTo,
+// }: SendResetPasswordEmailForUserArgs): Promise<Error> {
+//   try {
+//     const { data, error } = await supabaseClient.auth.api.resetPasswordForEmail(
+//       email,
+//       {
+//         redirectTo,
+//       },
+//     );
 
-    if (error || data === null) {
-      return { error: error?.message || 'Something went wrong' };
-    }
-    return {};
-  } catch (error) {
-    return {
-      error: 'Something went wrong',
-    };
-  }
-}
+//     if (error || data === null) {
+//       return { error: error?.message || 'Something went wrong' };
+//     }
+//     return {};
+//   } catch (error) {
+//     return {
+//       error: 'Something went wrong',
+//     };
+//   }
+// }
 
-type ResetPasswordForUserArgs = {
-  password: string;
-  session: Session;
-};
-type ResetPasswordReturn = {
-  user?: User;
-} & Error;
-export async function resetPasswordForUser({
-  password,
-  session,
-}: ResetPasswordForUserArgs): Promise<ResetPasswordReturn> {
-  try {
-    const { user, error } = await supabaseClient.auth.api.updateUser(
-      session.get('access_token'),
-      {
-        password,
-      },
-    );
+// type ResetPasswordForUserArgs = {
+//   password: string;
+//   session: Session;
+// };
+// type ResetPasswordReturn = {
+//   user?: User;
+// } & Error;
+// export async function resetPasswordForUser({
+//   password,
+//   session,
+// }: ResetPasswordForUserArgs): Promise<ResetPasswordReturn> {
+//   try {
+//     const { user, error } = await supabaseClient.auth.api.updateUser(
+//       session.get('access_token'),
+//       {
+//         password,
+//       },
+//     );
 
-    if (error || !user) {
-      return { error: error?.message || 'Something went wrong' };
-    }
+//     if (error || !user) {
+//       return { error: error?.message || 'Something went wrong' };
+//     }
 
-    return { user };
-  } catch {
-    return {
-      error: 'Something went wrong',
-    };
-  }
-}
+//     return { user };
+//   } catch {
+//     return {
+//       error: 'Something went wrong',
+//     };
+//   }
+// }
