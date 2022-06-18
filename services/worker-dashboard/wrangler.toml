@@ -1,0 +1,16 @@
+account_id = ""
+compatibility_date = "2022-06-15"
+name = "remix-dashboard-devio2022"
+
+main = "src/index.ts"
+
+workers_dev = true
+
+[dev]
+port = 8788
+
+[site]
+bucket = "../../apps/remix-dashboard/public"
+
+[env.dev]
+vars = {SESSION_SECRET = "should-be-secure-in-prod"}

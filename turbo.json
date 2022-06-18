@@ -2,13 +2,18 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", "public/build/**", ".cache/**"]
+      "outputs": [
+        "build/**",
+        "public/build/**",
+        "public/**/build/**",
+        ".cache/**"
+      ]
     },
     "lint": {
       "outputs": []
     },
     "dev": {
-      "dependsOn": ["remix-app#build"],
+      "dependsOn": ["remix-app#build", "remix-dashboard#build"],
       "cache": false
     },
     "type-check": {
