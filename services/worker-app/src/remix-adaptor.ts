@@ -37,6 +37,7 @@ export const remixAdapter = async (
   } catch (error) {}
   try {
     const loadContext: AppLoadContext = { env };
+
     return await handleRemixRequest(request, loadContext);
   } catch (error) {
     console.log(error);
