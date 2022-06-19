@@ -4,19 +4,16 @@ export type FooterProps = ComponentProps<'footer'>;
 
 export const Footer = () => {
   return (
-    <footer className="flex flex-col items-center justify-between px-6 py-4 bg-white dark:bg-gray-800 sm:flex-row">
+    <footer className="flex flex-col items-center justify-between px-6 py-4 bg-white dark:bg-gray-800 sm:flex-row border-t border-gray-500">
       <a
         href="/"
         className="text-xl font-bold text-gray-800 dark:text-white hover:text-gray-700 dark:hover:text-gray-300"
       >
         DevelopersIO 2022
       </a>
-      <p className="py-2 text-gray-800 dark:text-white sm:py-0">
-        All rights reserved
-      </p>
       <div className="flex -mx-2">
         <a
-          href="#"
+          href="https://github.com/himorishige"
           className="mx-2 text-gray-600 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-300"
           aria-label="Github"
         >
