@@ -6,6 +6,7 @@ import type { User, SupabaseClient } from '@supabase/supabase-js';
 type AuthForm = {
   email: string;
   password: string;
+  supabase: SupabaseClient;
 };
 
 export async function setSBAuth(
@@ -80,56 +81,58 @@ type LoginReturn = {
   accessToken?: string;
   refreshToken?: string;
 } & Error;
-// export async function loginUser({
-//   email,
-//   password,
-// }: AuthForm): Promise<LoginReturn> {
-//   try {
-//     const { data: sessionData, error: loginError } =
-//       await supabaseClient.auth.api.signInWithEmail(email, password);
+export async function loginUser({
+  email,
+  password,
+  supabase,
+}: AuthForm): Promise<LoginReturn> {
+  try {
+    const { data: sessionData, error: loginError } =
+      await supabase.auth.api.signInWithEmail(email, password);
 
-//     if (
-//       loginError ||
-//       !sessionData ||
-//       !sessionData.access_token ||
-//       !sessionData.refresh_token
-//     ) {
-//       return { error: loginError?.message || 'Something went wrong' };
-//     }
+    if (
+      loginError ||
+      !sessionData ||
+      !sessionData.access_token ||
+      !sessionData.refresh_token
+    ) {
+      return { error: loginError?.message || 'Something went wrong' };
+    }
 
-//     return {
-//       accessToken: sessionData.access_token,
-//       refreshToken: sessionData.refresh_token,
-//     };
-//   } catch {
-//     return { error: 'Something went wrong' };
-//   }
-// }
+    return {
+      accessToken: sessionData.access_token,
+      refreshToken: sessionData.refresh_token,
+    };
+  } catch {
+    return { error: 'Something went wrong' };
+  }
+}
 
-// type RegisterReturn = {
-//   user?: User;
-// } & Error;
-// export async function registerUser({
-//   email,
-//   password,
-// }: AuthForm): Promise<RegisterReturn> {
-//   try {
-//     const { user, error: signUpError } = await supabaseClient.auth.signUp({
-//       email,
-//       password,
-//     });
+type RegisterReturn = {
+  user?: User;
+} & Error;
+export async function registerUser({
+  email,
+  password,
+  supabase,
+}: AuthForm): Promise<RegisterReturn> {
+  try {
+    const { user, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-//     if (signUpError || !user) {
-//       return { error: signUpError?.message || 'Something went wrong' };
-//     }
+    if (signUpError || !user) {
+      return { error: signUpError?.message || 'Something went wrong' };
+    }
 
-//     return { user };
-//   } catch {
-//     return {
-//       error: 'Something went wrong',
-//     };
-//   }
-// }
+    return { user };
+  } catch {
+    return {
+      error: 'Something went wrong',
+    };
+  }
+}
 
 type SignOutUserReturn = {
   done: boolean;

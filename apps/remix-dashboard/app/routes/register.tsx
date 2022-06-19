@@ -1,24 +1,27 @@
 import { json, redirect } from '@remix-run/cloudflare';
 import { Form, Link } from '@remix-run/react';
-import { commitSession, getSession } from '~/session.server';
 import type { ActionFunction, LoaderFunction } from '~/types';
-import { loginUser, setAuthSession } from '~/utils/auth/auth.server';
+import { registerUser } from '~/utils/auth/auth.server';
 import { authHandler } from '~/utils/auth/authHandler.server';
 
 type ActionData = {
   formError?: string;
+  result?: string;
   fields?: { email: string };
 };
 
 export const action: ActionFunction = async ({
   request,
-  context: { env, supabase },
+  context: { supabase },
 }) => {
-  const session = await getSession(request.headers.get('Cookie'), env);
-
   const formData = await request.formData();
+  const username = formData.get('username');
   const email = formData.get('email');
   const password = formData.get('password');
+
+  if (typeof username !== 'string' || username.length === 0) {
+    return json({ errors: { title: 'username is required' } }, { status: 422 });
+  }
 
   if (typeof email !== 'string' || email.length === 0) {
     return json({ errors: { title: 'Email is required' } }, { status: 422 });
@@ -28,26 +31,23 @@ export const action: ActionFunction = async ({
     return json({ errors: { title: 'Password is required' } }, { status: 422 });
   }
 
-  // sing in
-  const { accessToken, refreshToken, error } = await loginUser({
+  await supabase.auth.signOut();
+
+  // sing up user
+  const { user, error } = await registerUser({
     email,
     password,
     supabase,
   });
-  if (error || !accessToken || !refreshToken) {
+  if (error || !user) {
     return json<ActionData>(
       { formError: error || 'Something went wrong', fields: { email } },
-      403,
+      401,
     );
   }
 
-  const newSession = setAuthSession(session, accessToken, refreshToken);
-
-  return redirect('/dashboard/', {
-    headers: {
-      'Set-Cookie': await commitSession(newSession, env),
-    },
-  });
+  return redirect('/dashboard/login');
+  //  return json<ActionData>({ result: 'success' }, { status: 201 });
 };
 
 export const loader: LoaderFunction = async ({
@@ -63,7 +63,7 @@ export const loader: LoaderFunction = async ({
   );
 };
 
-export default function Login() {
+export default function SignUp() {
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh_-_68px_-_61px)]">
       <div className="overflow-hidden mx-auto w-full max-w-sm bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -72,10 +72,10 @@ export default function Login() {
             DevelopersIO 2022
           </h2>
           <h3 className="mt-1 text-xl font-medium text-center text-gray-600 dark:text-gray-200">
-            Welcome Back
+            Welcome
           </h3>
           <p className="mt-1 text-center text-gray-500 dark:text-gray-400">
-            Login or create account
+            Create account
           </p>
           <Form method="post">
             <div className="mt-4 w-full">
@@ -107,20 +107,20 @@ export default function Login() {
                 className="py-2 px-4 leading-5 text-white bg-gray-700 hover:bg-gray-600 rounded focus:outline-none transition-colors duration-200"
                 type="submit"
               >
-                Login
+                Register
               </button>
             </div>
           </Form>
         </div>
         <div className="flex justify-center items-center py-4 text-center bg-gray-50 dark:bg-gray-700">
           <span className="text-sm text-gray-600 dark:text-gray-200">
-            Don't have an account?{' '}
+            Have an account?{' '}
           </span>
           <Link
-            to="/dashboard/register"
+            to="/dashboard/login"
             className="mx-2 text-sm font-bold text-blue-500 dark:text-blue-400 hover:underline"
           >
-            Register
+            Login
           </Link>
         </div>
       </div>

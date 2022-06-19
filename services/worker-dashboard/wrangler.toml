@@ -6,11 +6,9 @@ main = "src/index.ts"
 
 workers_dev = true
 
-[dev]
-port = 8788
+services = [
+  { binding = "API_GATEWAY", service = "worker-api-devio2022", environment = "production" },
+]
 
 [site]
 bucket = "../../apps/remix-dashboard/public"
-
-[env.dev]
-vars = {SESSION_SECRET = "should-be-secure-in-prod"}

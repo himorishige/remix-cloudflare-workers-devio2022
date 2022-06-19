@@ -1,6 +1,5 @@
 import type { MetaFunction } from '@remix-run/cloudflare';
 import {
-  Link,
   Links,
   LiveReload,
   Meta,
@@ -10,8 +9,9 @@ import {
   useCatch,
   useMatches,
 } from '@remix-run/react';
+import { Footer, Header } from 'ui';
 import type { PropsWithChildren } from 'react';
-// import styles from './styles/app.css';
+import styles from './styles/app.css';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
@@ -19,9 +19,9 @@ export const meta: MetaFunction = () => ({
   viewport: 'width=device-width,initial-scale=1',
 });
 
-// export const links = () => {
-//   return [{ rel: 'stylesheet', href: styles }];
-// };
+export const links = () => {
+  return [{ rel: 'stylesheet', href: styles }];
+};
 
 const Document = ({ children }: PropsWithChildren<{}>) => {
   const matches = useMatches();
@@ -33,18 +33,11 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
       <head>
         <Meta />
         <Links />
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@exampledev/new.css@1.1.3/new.css"
-        />
       </head>
-      <body>
-        <header>
-          <h1 className="text-3xl font-bold underline">
-            <Link to="/">Remix Dashboard</Link>
-          </h1>
-        </header>
+      <body className="bg-white dark:bg-gray-900">
+        <Header />
         {children}
+        <Footer />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
