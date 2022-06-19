@@ -11,6 +11,8 @@ import {
   useMatches,
 } from '@remix-run/react';
 import type { PropsWithChildren } from 'react';
+import { Footer, Header } from 'ui';
+import { Hero } from './components/Hero/Hero';
 import styles from './styles/app.css';
 
 export const meta: MetaFunction = () => ({
@@ -35,12 +37,10 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
         <Links />
       </head>
       <body>
-        <header>
-          <h1 className="text-3xl font-bold underline">
-            <Link to="/">Remix App</Link>
-          </h1>
-        </header>
+        <Header />
+        <Hero />
         {children}
+        <Footer />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
