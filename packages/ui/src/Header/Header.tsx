@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 export type HeaderProps = ComponentProps<'header'>;
 
-export const Header = (props: HeaderProps) => {
+export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const clickHandler = () => {
