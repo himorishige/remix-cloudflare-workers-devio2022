@@ -10,7 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "deploy": "turbo run build && wrangler -c services/worker/wrangler.toml publish",
-    "dev": "turbo run dev --parallel --filter=!@gateway",
+    "dev": "turbo run dev --filter=!gateway",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check"
