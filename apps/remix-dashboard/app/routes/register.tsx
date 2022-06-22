@@ -1,5 +1,6 @@
 import { json, redirect } from '@remix-run/cloudflare';
 import { Form, Link } from '@remix-run/react';
+import type { User } from '@supabase/supabase-js';
 import type { ActionFunction, LoaderFunction } from '~/types';
 import { registerUser } from '~/utils/auth/auth.server';
 import { authHandler } from '~/utils/auth/authHandler.server';
@@ -15,13 +16,8 @@ export const action: ActionFunction = async ({
   context: { supabase },
 }) => {
   const formData = await request.formData();
-  const username = formData.get('username');
   const email = formData.get('email');
   const password = formData.get('password');
-
-  if (typeof username !== 'string' || username.length === 0) {
-    return json({ errors: { title: 'username is required' } }, { status: 422 });
-  }
 
   if (typeof email !== 'string' || email.length === 0) {
     return json({ errors: { title: 'Email is required' } }, { status: 422 });
@@ -31,14 +27,30 @@ export const action: ActionFunction = async ({
     return json({ errors: { title: 'Password is required' } }, { status: 422 });
   }
 
-  await supabase.auth.signOut();
+  // await supabase.auth.signOut();
+
+  const response = await fetch('http://localhost:8082/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
+
+  const { user, error } = (await response.json()) as {
+    user: User;
+    error: string;
+  };
 
   // sing up user
-  const { user, error } = await registerUser({
-    email,
-    password,
-    supabase,
-  });
+  // const { user, error } = await registerUser({
+  //   email,
+  //   password,
+  //   supabase,
+  // });
   if (error || !user) {
     return json<ActionData>(
       { formError: error || 'Something went wrong', fields: { email } },
@@ -46,18 +58,18 @@ export const action: ActionFunction = async ({
     );
   }
 
-  return redirect('/dashboard/login');
+  return redirect('/dashboard/', {
+    headers: {
+      'Set-Cookie': response.headers.get('Set-Cookie') || '',
+    },
+  });
   //  return json<ActionData>({ result: 'success' }, { status: 201 });
 };
 
-export const loader: LoaderFunction = async ({
-  request,
-  context: { env, supabase },
-}) => {
+export const loader: LoaderFunction = async ({ request, context: { env } }) => {
   return await authHandler(
     request,
     env,
-    supabase,
     () => redirect('/dashboard/'),
     () => json({}),
   );

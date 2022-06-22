@@ -13,7 +13,7 @@ const handleRemixRequest = createRequestHandler(build, process.env.NODE_ENV);
 export const remixAdapter = async (
   request: Request,
   env: Env,
-  ctx?: ExecutionContext | FetchEvent,
+  ctx?: ExecutionContext,
 ): Promise<Response> => {
   try {
     let url = new URL(request.url);

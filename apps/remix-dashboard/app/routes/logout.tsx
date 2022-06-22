@@ -1,29 +1,23 @@
-import { signOutUser } from '~/utils/auth/auth.server';
-
 import type { ActionFunction, LoaderFunction } from '~/types';
 import { redirect } from '@remix-run/cloudflare';
-import { destroySession, getSession } from '~/session.server';
 
 export const loader: LoaderFunction = () => {
   return redirect('/dashboard');
 };
 
-export const action: ActionFunction = async ({
-  request,
-  context: { env, supabase },
-}) => {
-  let session = await getSession(request.headers.get('Cookie'), env);
-  if (!session) {
-    return redirect('/dashboard/login');
-  }
+export const action: ActionFunction = async ({ request }) => {
+  const response = await fetch('http://localhost:8082/logout', {
+    method: 'POST',
+    headers: request.headers,
+  });
 
-  const { done, error } = await signOutUser(session, supabase);
-  if (error || !done) {
-    console.log('Error signing out user in supabase', error);
-  }
+  const data = await response.json<{ success: boolean }>();
+  console.log(data);
 
   return redirect('/dashboard/login', {
-    headers: { 'Set-Cookie': await destroySession(session, env) },
+    headers: {
+      'Set-Cookie': response.headers.get('Set-Cookie') || '',
+    },
   });
 };
 

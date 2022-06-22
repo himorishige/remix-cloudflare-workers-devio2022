@@ -6,9 +6,11 @@ const getSessionStorage = (env: Env) => {
 
   return createCookieSessionStorage({
     cookie: {
+      name: 'devio2022',
       httpOnly: true,
       path: '/',
       sameSite: 'lax',
+      maxAge: 60 * 10,
       secrets: [env.SESSION_SECRET],
     },
   });

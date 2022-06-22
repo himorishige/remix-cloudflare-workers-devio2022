@@ -10,11 +10,8 @@ type ActionData = {
   fields?: { email: string };
 };
 
-export const action: ActionFunction = async ({
-  request,
-  context: { env, supabase },
-}) => {
-  const session = await getSession(request.headers.get('Cookie'), env);
+export const action: ActionFunction = async ({ request, context: { env } }) => {
+  // const session = await getSession(request.headers.get('Cookie'), env);
 
   const formData = await request.formData();
   const email = formData.get('email');
@@ -28,36 +25,57 @@ export const action: ActionFunction = async ({
     return json({ errors: { title: 'Password is required' } }, { status: 422 });
   }
 
-  // sing in
-  const { accessToken, refreshToken, error } = await loginUser({
-    email,
-    password,
-    supabase,
+  const response = await fetch('http://localhost:8082/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
   });
-  if (error || !accessToken || !refreshToken) {
-    return json<ActionData>(
-      { formError: error || 'Something went wrong', fields: { email } },
-      403,
-    );
-  }
 
-  const newSession = setAuthSession(session, accessToken, refreshToken);
+  const data = (await response.json()) as {
+    accessToken: string;
+    refreshToken: string;
+  };
+
+  console.log(data);
+
+  // return json({});
+  // return redirect('/dashboard/');
+
+  // // sing in
+  // const { accessToken, refreshToken, error } = await loginUser({
+  //   email,
+  //   password,
+  //   supabase,
+  // });
+  // if (error || !accessToken || !refreshToken) {
+  //   return json<ActionData>(
+  //     { formError: error || 'Something went wrong', fields: { email } },
+  //     403,
+  //   );
+  // }
+
+  // const newSession = setAuthSession(
+  //   session,
+  //   data.accessToken,
+  //   data.refreshToken,
+  // );
 
   return redirect('/dashboard/', {
     headers: {
-      'Set-Cookie': await commitSession(newSession, env),
+      'Set-Cookie': response.headers.get('Set-Cookie') || '',
     },
   });
 };
 
-export const loader: LoaderFunction = async ({
-  request,
-  context: { env, supabase },
-}) => {
+export const loader: LoaderFunction = async ({ request, context: { env } }) => {
   return await authHandler(
     request,
     env,
-    supabase,
     () => redirect('/dashboard/'),
     () => json({}),
   );

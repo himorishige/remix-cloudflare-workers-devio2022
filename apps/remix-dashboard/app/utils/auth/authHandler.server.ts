@@ -12,41 +12,71 @@ import { commitSession, getSession } from '~/session.server';
 export const authHandler = async (
   request: Request,
   env: Env,
-  supabase: SupabaseClient,
   onSuccess: (user: User) => Response | Promise<Response>,
   onFailure: () => Response | Promise<Response>,
   redirectTo?: string,
 ): Promise<Response> => {
   try {
-    let session = await getSession(request.headers.get('Cookie'), env);
+    // let session = await getSession(request.headers.get('Cookie'), env);
+
     const url = new URL(request.url);
     const redirectUrl =
       redirectTo || `${url.origin}${url.pathname}${url.search}`;
 
-    const isActiveAuthSession = await hasActiveAuthSession(session, supabase);
+    const { isActiveAuthSession } = await fetch(
+      'http://localhost:8082/is-active-auth-session',
+      {
+        headers: request.headers,
+      },
+    ).then((res) => res.json<{ isActiveAuthSession: boolean }>());
+
+    console.log('isAuth', isActiveAuthSession);
+
+    // const isActiveAuthSession = await hasActiveAuthSession(session, supabase);
     if (!isActiveAuthSession) {
-      const { accessToken, refreshToken, error } = await refreshUserToken(
-        session,
-        supabase,
-      );
+      // const { accessToken, refreshToken, error } = await refreshUserToken(
+      //   session,
+      //   supabase,
+      // );
+      const response = await fetch('http://localhost:8082/refresh-token', {
+        headers: request.headers,
+      });
+      const { accessToken, refreshToken, error } = await response.json<{
+        accessToken: string;
+        refreshToken: string;
+        error?: string;
+      }>();
+
       if (error || !accessToken || !refreshToken) {
         throw new Error('refreshUserToken ' + error);
       }
-      session = setAuthSession(session, accessToken, refreshToken);
+
+      // session = setAuthSession(session, accessToken, refreshToken);
       return redirect(redirectUrl, {
         headers: {
-          'Set-Cookie': await commitSession(session, env),
+          'Set-Cookie': response.headers.get('Set-Cookie') || '',
         },
       });
     }
 
-    const { user, error: accessTokenError } = await getUserByAccessToken(
-      session.get('access_token'),
-      supabase,
+    const response = await fetch(
+      'http://localhost:8082/get-user-by-access-token',
+      {
+        headers: request.headers,
+      },
     );
+    const { user, error } = await response.json<{
+      user: User;
+      error?: string;
+    }>();
 
-    if (accessTokenError || !user || !user.email || !user.id) {
-      throw new Error('getUserByAccessToken ' + accessTokenError);
+    // const { user, error: accessTokenError } = await getUserByAccessToken(
+    //   session.get('access_token'),
+    //   supabase,
+    // );
+
+    if (error || !user || !user.email || !user.id) {
+      throw new Error('getUserByAccessToken ' + error);
     }
 
     return await onSuccess(user);
