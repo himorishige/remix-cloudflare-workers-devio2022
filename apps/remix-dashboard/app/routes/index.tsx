@@ -47,7 +47,7 @@ export default function Index() {
   console.log(access_token, refresh_token);
 
   return (
-    <main className="container mx-auto">
+    <main className="container mx-auto min-h-[calc(100vh_-_68px_-_61px)]">
       <Form method="post" action="/dashboard/logout">
         <Button type="submit">Logout</Button>
       </Form>

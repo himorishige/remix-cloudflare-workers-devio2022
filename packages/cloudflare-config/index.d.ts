@@ -7,6 +7,7 @@ interface Env {
   SUPABASE_ANON_KEY: string;
 
   SESSION_SECRET: string;
+  AUTH_SERVICE: ServiceWorkerGlobalScope;
 
   API_GATEWAY: ServiceWorkerGlobalScope;
 }
