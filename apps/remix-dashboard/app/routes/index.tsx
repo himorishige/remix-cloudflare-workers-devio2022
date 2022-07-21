@@ -13,11 +13,10 @@ type LoaderData = {
 };
 
 export const loader: LoaderFunction = async ({ context: { env }, request }) => {
-  const response = await fetch('https://devio2022.himorishige.com/api/coffee');
-  // const response = await env.API_GATEWAY.fetch('https://.../api/coffee');
+  const response = await env.API_GATEWAY.fetch('https://.../api/coffee');
   const data = await response.json<{ file: string }>();
 
-  const sessionResponse = await fetch('http://localhost:8082/session', {
+  const sessionResponse = await env.AUTH_SERVICE.fetch('http://.../session', {
     headers: {
       Cookie: request.headers.get('Cookie') || '',
     },
@@ -43,8 +42,7 @@ export const loader: LoaderFunction = async ({ context: { env }, request }) => {
 };
 
 export default function Index() {
-  const { access_token, refresh_token, file } = useLoaderData() as LoaderData;
-  console.log(access_token, refresh_token);
+  const { file } = useLoaderData() as LoaderData;
 
   return (
     <main className="container mx-auto min-h-[calc(100vh_-_68px_-_61px)]">
@@ -54,9 +52,6 @@ export default function Index() {
       <div className="grid grid-cols-2 gap-4">
         <div className="overflow-hidden mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
           <img className="object-cover w-full h-56" src={file} alt="avatar" />
-          {/* <div className="w-full">
-            <LineChart />
-          </div> */}
 
           <div className="py-5 text-center">
             <span className="block text-2xl font-bold text-gray-800 dark:text-white">
@@ -68,7 +63,6 @@ export default function Index() {
           </div>
         </div>
         <div className="overflow-hidden mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          {/* <img className="object-cover w-full h-56" src={file} alt="avatar" /> */}
           <div className="w-full">
             <LineChart />
           </div>

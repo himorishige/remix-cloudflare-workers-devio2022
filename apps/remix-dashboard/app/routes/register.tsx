@@ -2,7 +2,6 @@ import { json, redirect } from '@remix-run/cloudflare';
 import { Form, Link } from '@remix-run/react';
 import type { User } from '@supabase/supabase-js';
 import type { ActionFunction, LoaderFunction } from '~/types';
-import { registerUser } from '~/utils/auth/auth.server';
 import { authHandler } from '~/utils/auth/authHandler.server';
 
 type ActionData = {
@@ -11,10 +10,7 @@ type ActionData = {
   fields?: { email: string };
 };
 
-export const action: ActionFunction = async ({
-  request,
-  context: { supabase },
-}) => {
+export const action: ActionFunction = async ({ request, context: { env } }) => {
   const formData = await request.formData();
   const email = formData.get('email');
   const password = formData.get('password');
@@ -27,9 +23,7 @@ export const action: ActionFunction = async ({
     return json({ errors: { title: 'Password is required' } }, { status: 422 });
   }
 
-  // await supabase.auth.signOut();
-
-  const response = await fetch('http://localhost:8082/register', {
+  const response = await env.AUTH_SERVICE.fetch('http://.../register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,12 +39,6 @@ export const action: ActionFunction = async ({
     error: string;
   };
 
-  // sing up user
-  // const { user, error } = await registerUser({
-  //   email,
-  //   password,
-  //   supabase,
-  // });
   if (error || !user) {
     return json<ActionData>(
       { formError: error || 'Something went wrong', fields: { email } },
@@ -63,7 +51,6 @@ export const action: ActionFunction = async ({
       'Set-Cookie': response.headers.get('Set-Cookie') || '',
     },
   });
-  //  return json<ActionData>({ result: 'success' }, { status: 201 });
 };
 
 export const loader: LoaderFunction = async ({ request, context: { env } }) => {

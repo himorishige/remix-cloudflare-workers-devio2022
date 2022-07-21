@@ -1,18 +1,9 @@
 import { json, redirect } from '@remix-run/cloudflare';
 import { Form, Link } from '@remix-run/react';
-import { commitSession, getSession } from '~/session.server';
 import type { ActionFunction, LoaderFunction } from '~/types';
-import { loginUser, setAuthSession } from '~/utils/auth/auth.server';
 import { authHandler } from '~/utils/auth/authHandler.server';
 
-type ActionData = {
-  formError?: string;
-  fields?: { email: string };
-};
-
 export const action: ActionFunction = async ({ request, context: { env } }) => {
-  // const session = await getSession(request.headers.get('Cookie'), env);
-
   const formData = await request.formData();
   const email = formData.get('email');
   const password = formData.get('password');
@@ -25,7 +16,7 @@ export const action: ActionFunction = async ({ request, context: { env } }) => {
     return json({ errors: { title: 'Password is required' } }, { status: 422 });
   }
 
-  const response = await fetch('http://localhost:8082/login', {
+  const response = await env.AUTH_SERVICE.fetch('http://.../login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,30 +31,6 @@ export const action: ActionFunction = async ({ request, context: { env } }) => {
     accessToken: string;
     refreshToken: string;
   };
-
-  console.log(data);
-
-  // return json({});
-  // return redirect('/dashboard/');
-
-  // // sing in
-  // const { accessToken, refreshToken, error } = await loginUser({
-  //   email,
-  //   password,
-  //   supabase,
-  // });
-  // if (error || !accessToken || !refreshToken) {
-  //   return json<ActionData>(
-  //     { formError: error || 'Something went wrong', fields: { email } },
-  //     403,
-  //   );
-  // }
-
-  // const newSession = setAuthSession(
-  //   session,
-  //   data.accessToken,
-  //   data.refreshToken,
-  // );
 
   return redirect('/dashboard/', {
     headers: {

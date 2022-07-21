@@ -5,8 +5,8 @@ export const loader: LoaderFunction = () => {
   return redirect('/dashboard');
 };
 
-export const action: ActionFunction = async ({ request }) => {
-  const response = await fetch('http://localhost:8082/logout', {
+export const action: ActionFunction = async ({ request, context: { env } }) => {
+  const response = await env.AUTH_SERVICE.fetch('http://.../logout', {
     method: 'POST',
     headers: request.headers,
   });
